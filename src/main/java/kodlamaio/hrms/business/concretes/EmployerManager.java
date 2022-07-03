@@ -5,8 +5,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import kodlamaio.hrms.business.BusinessGenericRules;
 import kodlamaio.hrms.business.abstracts.EmployerService;
+import kodlamaio.hrms.business.utilities.genericBusinessRules.BusinessGenericRules;
+import kodlamaio.hrms.core.business.BusinessRuleScanner;
 import kodlamaio.hrms.core.utilities.results.DataResult;
 import kodlamaio.hrms.core.utilities.results.ErrorDataResult;
 import kodlamaio.hrms.core.utilities.results.ErrorResult;
@@ -38,16 +39,20 @@ public class EmployerManager implements EmployerService {
 	@Override
 	public Result add(EmployerSignUpDto employerSignUpDto) {
 
-		if (!validateEmployer(employerSignUpDto))
-			return new ErrorResult("Adding was failed");
+		Result validEntity = null;
+		if (!(validEntity = validateEmployer(employerSignUpDto)).isSuccess())
+			return new ErrorResult("Adding was failed\n" + validEntity.getMessage());
 
 		var employer = mapEmployer(employerSignUpDto);
 
-		if (checkDomainValid(employer) && BusinessGenericRules.isEmailUnique(employer, this.employerDao)) {
+		var result = BusinessRuleScanner.scanRules(checkDomainValid(employer), 
+				BusinessGenericRules.isEmailUnique(employer, this.employerDao));
+		
+		if (result.isSuccess()) {
 			this.employerDao.save(employer);
 			return new SuccessResult("Employer was added successfully");
 		}
-		return new ErrorResult("Adding was failed");
+		return new ErrorResult("Adding was failed\n" + result.getMessage());
 
 	}
 
@@ -86,20 +91,25 @@ public class EmployerManager implements EmployerService {
 		return new ErrorResult("Updating was failed");
 	}
 
-	private boolean checkDomainValid(Employer employer) {
+	private Result checkDomainValid(Employer employer) {
 
 		String domainInspection = (employer.getWebSite().split("\\."))[1];
-		return employer.getEmail().contains(domainInspection);
+		return employer.getEmail().contains(domainInspection) ?
+				new SuccessResult("Valid Domain-Phone match"):
+				new ErrorResult("Invalid Domain-Phone match");
+			
 	}
 
-	private boolean validateEmployer(EmployerSignUpDto employerSignUpDto) {
+	private Result validateEmployer(EmployerSignUpDto employerSignUpDto) {
 
 		if (employerSignUpDto != null && employerSignUpDto.getPassword() != null
 				&& employerSignUpDto.getPasswordAgain() != null) {
-			return employerSignUpDto.getPassword().equals(employerSignUpDto.getPasswordAgain());
+			return employerSignUpDto.getPassword().equals(employerSignUpDto.getPasswordAgain()) ?
+					new SuccessResult("Valid user information"):
+					new ErrorResult("Invalid user information");
 		}
 
-		return false;
+		return new ErrorResult("Missing user information");
 	}
 
 	private Employer mapEmployer(EmployerSignUpDto employerSignUpDto) {

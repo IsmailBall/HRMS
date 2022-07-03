@@ -5,9 +5,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import kodlamaio.hrms.business.BusinessGenericRules;
 import kodlamaio.hrms.business.abstracts.JobSeekerService;
 import kodlamaio.hrms.business.externalServices.PersonNationalIdCheck;
+import kodlamaio.hrms.business.utilities.genericBusinessRules.BusinessGenericRules;
+import kodlamaio.hrms.core.business.BusinessRuleScanner;
 import kodlamaio.hrms.core.utilities.results.DataResult;
 import kodlamaio.hrms.core.utilities.results.ErrorResult;
 import kodlamaio.hrms.core.utilities.results.Result;
@@ -40,18 +41,23 @@ public class JobSeekerManager implements JobSeekerService {
 	@Override
 	public Result add(JobSeekerSignUpDto jobSeekerSignUpDto) {
 
-		if (!validateJobSeeker(jobSeekerSignUpDto))
-			return new ErrorResult("Adding was failed");
+		Result validEntity = null;
+		if (!(validEntity = validateJobSeeker(jobSeekerSignUpDto)).isSuccess())
+			return new ErrorResult("Adding was failed\n" + validEntity.getMessage());
 
 		JobSeeker jobSeeker = mapJobSeeker(jobSeekerSignUpDto);
 
-		if (this.personNationalIdCheck.checkPersonIsValid(jobSeeker)
-				&& BusinessGenericRules.isEmailUnique(jobSeeker, this.jobSeekerDao) && isNationalIdUnique(jobSeeker)) {
+		var result = BusinessRuleScanner.scanRules(
+				BusinessGenericRules.isEmailUnique(jobSeeker, this.jobSeekerDao),
+				isNationalIdUnique(jobSeeker),
+				this.personNationalIdCheck.checkPersonIsValid(jobSeeker));
+		
+		if (result.isSuccess()) {
 			this.jobSeekerDao.save(jobSeeker);
 			return new SuccessResult("Job Seeker was added successfully");
 		}
 
-		return new ErrorResult("Adding was failed");
+		return new ErrorResult("Adding was failed\n" + result.getMessage());
 
 	}
 
@@ -77,14 +83,17 @@ public class JobSeekerManager implements JobSeekerService {
 		return new ErrorResult("User could not found!");
 	}
 
-	private boolean validateJobSeeker(JobSeekerSignUpDto jobSeekerSignUpDto) {
+	private Result validateJobSeeker(JobSeekerSignUpDto jobSeekerSignUpDto) {
 
 		if (jobSeekerSignUpDto != null && jobSeekerSignUpDto.getPassword() != null
 				&& jobSeekerSignUpDto.getPasswordAgain() != null) {
-			return jobSeekerSignUpDto.getPassword().equals(jobSeekerSignUpDto.getPasswordAgain());
+			
+			return jobSeekerSignUpDto.getPassword().equals(jobSeekerSignUpDto.getPasswordAgain()) ? 
+					new SuccessResult("Validation was completed successfully") :
+					new ErrorResult("Validation was completed successfully");
 		}
 
-		return false;
+		return new ErrorResult("There is no such an user");
 	}
 
 	private JobSeeker mapJobSeeker(JobSeekerSignUpDto jobSeekerSignUpDto) {
@@ -102,8 +111,10 @@ public class JobSeekerManager implements JobSeekerService {
 
 	}
 
-	private boolean isNationalIdUnique(JobSeeker jobSeeker) {
-		return !this.jobSeekerDao.findAll().stream().anyMatch(x -> x.getNationalId().equals(jobSeeker.getNationalId()));
+	private Result isNationalIdUnique(JobSeeker jobSeeker) {
+		return this.jobSeekerDao.findAll().stream().anyMatch(x -> x.getNationalId().equals(jobSeeker.getNationalId())) ?
+				new ErrorResult("NationalId is not unique"):
+				new SuccessResult("NationalId is unique");	
 	}
 
 }
