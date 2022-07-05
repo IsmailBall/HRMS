@@ -12,15 +12,15 @@ import kodlamaio.hrms.core.utilities.results.ErrorResult;
 import kodlamaio.hrms.core.utilities.results.Result;
 import kodlamaio.hrms.core.utilities.results.SuccessDataResult;
 import kodlamaio.hrms.core.utilities.results.SuccessResult;
-import kodlamaio.hrms.dataAccess.concretes.SystemUserDao;
+import kodlamaio.hrms.dataAccess.abstracts.SystemUserDao;
 import kodlamaio.hrms.entities.concretes.SystemUser;
 
 @Service
-public class SystemUserManager implements SystemUserService{
+public class SystemUserManager implements SystemUserService {
 
 	private SystemUserDao systemUserDao;
 	private EmployerService employerService;
-	
+
 	@Autowired
 	public SystemUserManager(SystemUserDao systemUserDao, EmployerService employerService) {
 		super();
@@ -31,7 +31,8 @@ public class SystemUserManager implements SystemUserService{
 	@Override
 	public DataResult<List<SystemUser>> getAll() {
 		// TODO Auto-generated method stub
-		return new SuccessDataResult<List<SystemUser>>(this.systemUserDao.findAll(),"System users were listed successfully");
+		return new SuccessDataResult<List<SystemUser>>(this.systemUserDao.findAll(),
+				"System users were listed successfully");
 	}
 
 	@Override
@@ -44,17 +45,15 @@ public class SystemUserManager implements SystemUserService{
 	public Result confirmEmployer(String email) {
 
 		var result = this.employerService.findByEmail(email);
-		
-		if(result.isSuccess())
-		{
+
+		if (result.isSuccess()) {
 			result.getData().setHrmsValid(true);
 			this.employerService.update(result.getData());
 			return new SuccessResult("Account was confirmed!");
 		}
-		
-		return new ErrorResult("An error occured during transaction. Try again later!\n" + result.getMessage()); 
-		
+
+		return new ErrorResult("An error occured during transaction. Try again later!\n" + result.getMessage());
+
 	}
 
-	
 }

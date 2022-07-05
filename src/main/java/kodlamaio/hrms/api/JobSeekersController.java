@@ -41,12 +41,12 @@ public class JobSeekersController {
 	}
 	
 	@GetMapping("/getall/{nationalId}")
-	public DataResult<JobSeeker> getByNationalId(@RequestParam(required = true, defaultValue = "", value="nationalId") String nationalId) {
+	public DataResult<JobSeeker> findByNationalIdIs(@RequestParam(required = true, defaultValue = "", value="nationalId") String nationalId) {
 		return this.jobSeekerService.findByNationalIdIs(nationalId);
 	}
 	
 	@PostMapping("/validation")
-	public Result ConfirmEmail(@RequestBody JobSeekerEmailValidationDto jobSeekerEmailValidationDto)
+	public Result validateEmail(@RequestBody JobSeekerEmailValidationDto jobSeekerEmailValidationDto)
 	{
 		return this.jobSeekerService.validateEmail(jobSeekerEmailValidationDto);
 	}

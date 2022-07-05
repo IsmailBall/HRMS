@@ -9,6 +9,8 @@ import kodlamaio.hrms.entities.concretes.SystemUser;
 public interface SystemUserService {
 
 	DataResult<List<SystemUser>> getAll();
+
 	Result add(SystemUser systemUser);
+
 	Result confirmEmployer(String email);
 }

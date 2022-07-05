@@ -14,7 +14,7 @@ import kodlamaio.hrms.core.utilities.results.ErrorResult;
 import kodlamaio.hrms.core.utilities.results.Result;
 import kodlamaio.hrms.core.utilities.results.SuccessDataResult;
 import kodlamaio.hrms.core.utilities.results.SuccessResult;
-import kodlamaio.hrms.dataAccess.concretes.JobSeekerDao;
+import kodlamaio.hrms.dataAccess.abstracts.JobSeekerDao;
 import kodlamaio.hrms.entities.concretes.JobSeeker;
 import kodlamaio.hrms.entities.dtos.JobSeekerEmailValidationDto;
 import kodlamaio.hrms.entities.dtos.JobSeekerSignUpDto;
@@ -47,11 +47,9 @@ public class JobSeekerManager implements JobSeekerService {
 
 		JobSeeker jobSeeker = mapJobSeeker(jobSeekerSignUpDto);
 
-		var result = BusinessRuleScanner.scanRules(
-				BusinessGenericRules.isEmailUnique(jobSeeker, this.jobSeekerDao),
-				isNationalIdUnique(jobSeeker),
-				this.personNationalIdCheck.checkPersonIsValid(jobSeeker));
-		
+		var result = BusinessRuleScanner.scanRules(BusinessGenericRules.isEmailUnique(jobSeeker, this.jobSeekerDao),
+				isNationalIdUnique(jobSeeker), this.personNationalIdCheck.checkPersonIsValid(jobSeeker));
+
 		if (result.isSuccess()) {
 			this.jobSeekerDao.save(jobSeeker);
 			return new SuccessResult("Job Seeker was added successfully");
@@ -87,10 +85,10 @@ public class JobSeekerManager implements JobSeekerService {
 
 		if (jobSeekerSignUpDto != null && jobSeekerSignUpDto.getPassword() != null
 				&& jobSeekerSignUpDto.getPasswordAgain() != null) {
-			
-			return jobSeekerSignUpDto.getPassword().equals(jobSeekerSignUpDto.getPasswordAgain()) ? 
-					new SuccessResult("Validation was completed successfully") :
-					new ErrorResult("Validation was completed successfully");
+
+			return jobSeekerSignUpDto.getPassword().equals(jobSeekerSignUpDto.getPasswordAgain())
+					? new SuccessResult("Validation was completed successfully")
+					: new ErrorResult("Validation was completed successfully");
 		}
 
 		return new ErrorResult("There is no such an user");
@@ -112,9 +110,9 @@ public class JobSeekerManager implements JobSeekerService {
 	}
 
 	private Result isNationalIdUnique(JobSeeker jobSeeker) {
-		return this.jobSeekerDao.findAll().stream().anyMatch(x -> x.getNationalId().equals(jobSeeker.getNationalId())) ?
-				new ErrorResult("NationalId is not unique"):
-				new SuccessResult("NationalId is unique");	
+		return this.jobSeekerDao.findAll().stream().anyMatch(x -> x.getNationalId().equals(jobSeeker.getNationalId()))
+				? new ErrorResult("NationalId is not unique")
+				: new SuccessResult("NationalId is unique");
 	}
 
 }

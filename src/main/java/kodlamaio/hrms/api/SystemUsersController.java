@@ -30,7 +30,7 @@ public class SystemUsersController {
 		return systemUserService.getAll();
 	}
 	
-	@GetMapping("/validateEmp/{email}")
+	@GetMapping("/validate/{email}")
 	public Result confirmEmployer(@RequestParam(required = true, defaultValue = "", value="email") String email) {
 		return this.systemUserService.confirmEmployer(email);
 	}

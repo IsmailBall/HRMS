@@ -11,9 +11,15 @@ import kodlamaio.hrms.entities.dtos.EmployerSignUpDto;
 public interface EmployerService {
 
 	DataResult<List<Employer>> getAll();
+
 	Result add(EmployerSignUpDto employerSignUpDto);
+
 	Result validateEmail(EmployerEmailValidationDto employerEmailValidationDto);
+
 	DataResult<Employer> findByEmail(String email);
+
 	Result update(Employer employer);
 	
+	Result setActivityOfJob(int jobId);
+
 }

@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service;
 import kodlamaio.hrms.business.abstracts.JobTitleService;
 import kodlamaio.hrms.core.utilities.results.DataResult;
 import kodlamaio.hrms.core.utilities.results.SuccessDataResult;
-import kodlamaio.hrms.dataAccess.concretes.JobTitlesDao;
+import kodlamaio.hrms.dataAccess.abstracts.JobTitlesDao;
 import kodlamaio.hrms.entities.concretes.JobTitle;
 
 @Service
-public class JobTitleManager implements JobTitleService{
+public class JobTitleManager implements JobTitleService {
 
 	private JobTitlesDao jobTitlesDao;
-	
+
 	public JobTitleManager(JobTitlesDao jobTitlesDao) {
 		super();
 		this.jobTitlesDao = jobTitlesDao;
@@ -22,7 +22,7 @@ public class JobTitleManager implements JobTitleService{
 
 	@Override
 	public DataResult<List<JobTitle>> getAll() {
-		
+
 		return new SuccessDataResult<List<JobTitle>>(this.jobTitlesDao.findAll());
 	}
 

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import kodlamaio.hrms.business.abstracts.EmployerService;
@@ -21,28 +22,31 @@ import kodlamaio.hrms.entities.dtos.EmployerSignUpDto;
 public class EmployersController {
 
 	private EmployerService employerService;
-	
+
 	@Autowired
 	public EmployersController(EmployerService employerService) {
 		super();
 		this.employerService = employerService;
 	}
-	
+
 	@GetMapping("/getall")
-	public DataResult<List<Employer>> getAll(){
+	public DataResult<List<Employer>> getAll() {
 		return employerService.getAll();
 	}
-	
+
 	@PostMapping("/add")
-	public Result add(@RequestBody EmployerSignUpDto employerSignUpDto)
-	{
+	public Result add(@RequestBody EmployerSignUpDto employerSignUpDto) {
 		return this.employerService.add(employerSignUpDto);
 	}
-	
+
 	@PostMapping("/validation")
-	public Result ConfirmEmail(@RequestBody EmployerEmailValidationDto emailValidationDto)
-	{
+	public Result validateEmail(@RequestBody EmployerEmailValidationDto emailValidationDto) {
 		return this.employerService.validateEmail(emailValidationDto);
 	}
-	
+
+	@GetMapping("/setActivityOfJob/{jobId}")
+	Result setActivityOfJob(@RequestParam(value = "jobId", required = true) int jobId) {
+		return this.employerService.setActivityOfJob(jobId);
+	}
+
 }

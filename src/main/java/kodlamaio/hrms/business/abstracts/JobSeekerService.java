@@ -11,7 +11,10 @@ import kodlamaio.hrms.entities.dtos.JobSeekerSignUpDto;
 public interface JobSeekerService {
 
 	DataResult<List<JobSeeker>> getAll();
+
 	Result add(JobSeekerSignUpDto jobSeekerSignUpDto);
+
 	DataResult<JobSeeker> findByNationalIdIs(String nationalId);
+
 	Result validateEmail(JobSeekerEmailValidationDto jobSeekerEmailValidationDto);
 }
